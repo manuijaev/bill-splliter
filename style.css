@@ -1,0 +1,106 @@
+/* General Page Styling */
+body {
+    font-family: Arial, sans-serif;
+    background: black;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Container for forms and tracker */
+  #loginBox, #signupBox, #billTracker {
+    width: 90%;
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 25px;
+    background: bisque;
+    border-radius: 12px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+  }
+  
+  /* Headings */
+  h2, h3 {
+    text-align: center;
+    color: #333;
+  }
+  
+  /* Form fields */
+  form label {
+    display: block;
+    margin-top: 12px;
+    font-weight: bold;
+  }
+  
+  form input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  
+  /* Buttons */
+  button {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+  }
+  
+  /* Button Styles */
+  #logoutBtn {
+    background: #007bff;
+    color: white;
+  }
+  
+  #logoutBtn:hover {
+    background: #0056b3;
+  }
+  
+  #clearBtn {
+    background: #e74c3c;
+    color: white;
+    margin-left: 10px;
+  }
+  
+  #clearBtn:hover {
+    background: #c0392b;
+  }
+  
+  /* Table Styling */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  th {
+    background: #007bff;
+    color: white;
+  }
+  
+  tr:nth-child(even) {
+    background: #f9f9f9;
+  }
+  
+  /* Balance Section */
+  #balances {
+    background: #f1f1f1;
+    padding: 12px;
+    border-radius: 6px;
+    margin-top: 15px;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  

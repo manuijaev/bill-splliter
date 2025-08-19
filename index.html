@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bill Splitter</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Login Section -->
+  <div id="loginBox">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <label>Username</label>
+      <input type="text" id="loginUser" required>
+      <label>Password</label>
+      <input type="password" id="loginPass" required>
+      <button type="submit">Login</button>
+      <p>Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
+    </form>
+  </div>
+
+  <!-- Signup Section -->
+  <div id="signupBox" style="display:none;">
+    <h2>Sign Up</h2>
+    <form id="signupForm">
+      <label>Username</label>
+      <input type="text" id="signupUser" required>
+      <label>Password</label>
+      <input type="password" id="signupPass" required>
+      <button type="submit">Sign Up</button>
+      <p>Already have an account? <a href="#" id="showLogin">Login</a></p>
+    </form>
+  </div>
+
+  <!-- Bill Tracker Section -->
+  <div id="billTracker" style="display:none;">
+    <h2>Bill Tracker</h2>
+    <p id="welcome"></p>
+
+    <form id="billForm">
+      <label>Payer Name</label>
+      <input type="text" id="name" required>
+
+      <label>Amount Paid</label>
+      <input type="number" id="amount" required>
+
+      <label>Description</label>
+      <input type="text" id="description" required>
+
+      <label>Refund (who should refund?)</label>
+      <input type="text" id="refund">
+
+      <button type="submit">Add Bill</button>
+    </form>
+
+    <h3>Payments</h3>
+    <table id="billTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Amount</th>
+          <th>Description</th>
+          <th>Refund</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div id="result"></div>
+
+    <button id="resetBtn">Clear All Payments</button>
+    <button id="logoutBtn">Logout</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+
+
