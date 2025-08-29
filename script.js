@@ -1,164 +1,207 @@
-// Auth
-const loginBox = document.getElementById("loginBox");
-const signupBox = document.getElementById("signupBox");
-const billTracker = document.getElementById("billTracker");
-
-const loginForm = document.getElementById("loginForm");
-const signupForm = document.getElementById("signupForm");
-const showSignup = document.getElementById("showSignup");
-const showLogin = document.getElementById("showLogin");
-const welcome = document.getElementById("welcome");
+// ===== AUTH SECTION =====
+const authSection = document.getElementById("authSection");
+const appSection = document.getElementById("appSection");
+const authForm = document.getElementById("authForm");
+const toggleAuth = document.getElementById("toggleAuth");
+const authTitle = document.getElementById("authTitle");
+const authBtn = document.getElementById("authBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 
-// Bill Tracker
-const form = document.getElementById("billForm");
+let isLogin = true;
+
+// Load saved users
+let users = JSON.parse(localStorage.getItem("users")) || {};
+let currentUser = localStorage.getItem("currentUser") || null;
+
+if (currentUser) {
+  authSection.style.display = "none";
+  appSection.style.display = "block";
+}
+
+toggleAuth.addEventListener("click", (e) => {
+  e.preventDefault();
+  isLogin = !isLogin;
+  authTitle.textContent = isLogin ? "Login" : "Register";
+  authBtn.textContent = isLogin ? "Login" : "Register";
+  toggleAuth.textContent = isLogin
+    ? "Don't have an account? Register"
+    : "Already have an account? Login";
+});
+
+authForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (isLogin) {
+    if (users[username] && users[username] === password) {
+      currentUser = username;
+      localStorage.setItem("currentUser", username);
+      authSection.style.display = "none";
+      appSection.style.display = "block";
+      loadData();
+    } else {
+      alert("Invalid credentials!");
+    }
+  } else {
+    if (users[username]) {
+      alert("User already exists!");
+    } else {
+      users[username] = password;
+      localStorage.setItem("users", JSON.stringify(users));
+      alert("Registration successful! Please login.");
+      isLogin = true;
+      authTitle.textContent = "Login";
+      authBtn.textContent = "Login";
+      toggleAuth.textContent = "Don't have an account? Register";
+    }
+  }
+});
+
+logoutBtn.addEventListener("click", () => {
+  currentUser = null;
+  localStorage.removeItem("currentUser");
+  appSection.style.display = "none";
+  authSection.style.display = "block";
+});
+
+// ===== BILL TRACKER SECTION =====
+const activityForm = document.getElementById("activityForm");
+const activitySelect = document.getElementById("activitySelect");
+const participantForm = document.getElementById("participantForm");
+const participantName = document.getElementById("participantName");
+const participantsList = document.getElementById("participantsList");
+const billForm = document.getElementById("billForm");
+const payerName = document.getElementById("payerName");
+const amount = document.getElementById("amount");
+const description = document.getElementById("description");
 const tableBody = document.querySelector("#billTable tbody");
 const resultDiv = document.getElementById("result");
 const resetBtn = document.getElementById("resetBtn");
 
-let bills = JSON.parse(localStorage.getItem("bills")) || [];
+let data = {}; // { user: { activities: { activityName: { participants:[], bills:[] } } } }
 
-// Render bills & settlements
-function renderBills() {
-  tableBody.innerHTML = "";
-  let totals = {};
+function loadData() {
+  data = JSON.parse(localStorage.getItem("data")) || {};
+  if (!data[currentUser]) data[currentUser] = { activities: {} };
+  renderActivities();
+}
 
-  bills.forEach(bill => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${bill.name}</td>
-      <td>${bill.amount}</td>
-      <td>${bill.description}</td>
-      <td>${bill.refund || "-"}</td>
-    `;
-    tableBody.appendChild(row);
+function saveData() {
+  localStorage.setItem("data", JSON.stringify(data));
+}
 
-    totals[bill.name] = (totals[bill.name] || 0) + Number(bill.amount);
+function renderActivities() {
+  activitySelect.innerHTML = "";
+  const activities = data[currentUser].activities;
+  for (let act in activities) {
+    const option = document.createElement("option");
+    option.value = act;
+    option.textContent = act;
+    activitySelect.appendChild(option);
+  }
+  if (activitySelect.value) renderActivity(activitySelect.value);
+}
+
+function renderActivity(activity) {
+  const actData = data[currentUser].activities[activity];
+  // Render participants
+  participantsList.innerHTML = "";
+  actData.participants.forEach(p => {
+    const li = document.createElement("li");
+    li.textContent = p;
+    participantsList.appendChild(li);
   });
+  // Render bills
+  tableBody.innerHTML = "";
+  actData.bills.forEach(bill => {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td>${bill.name}</td><td>${bill.amount}</td><td>${bill.description}</td>`;
+    tableBody.appendChild(row);
+  });
+  calculateSettlements(activity);
+}
 
+activityForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const name = document.getElementById("activityName").value.trim();
+  if (!data[currentUser].activities[name]) {
+    data[currentUser].activities[name] = { participants: [], bills: [] };
+    saveData();
+    renderActivities();
+    activityForm.reset();
+  } else {
+    alert("Activity already exists!");
+  }
+});
+
+participantForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const activity = activitySelect.value;
+  const pName = participantName.value.trim();
+  if (activity && pName && !data[currentUser].activities[activity].participants.includes(pName)) {
+    data[currentUser].activities[activity].participants.push(pName);
+    saveData();
+    renderActivity(activity);
+    participantForm.reset();
+  }
+});
+
+billForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const activity = activitySelect.value;
+  const bill = {
+    name: payerName.value.trim(),
+    amount: Number(amount.value),
+    description: description.value.trim()
+  };
+  if (activity) {
+    data[currentUser].activities[activity].bills.push(bill);
+    saveData();
+    renderActivity(activity);
+    billForm.reset();
+  }
+});
+
+function calculateSettlements(activity) {
+  const actData = data[currentUser].activities[activity];
+  let totals = {};
+  actData.participants.forEach(p => totals[p] = 0);
+  actData.bills.forEach(bill => {
+    totals[bill.name] = (totals[bill.name] || 0) + bill.amount;
+  });
   const names = Object.keys(totals);
   const totalAmount = Object.values(totals).reduce((a, b) => a + b, 0);
   const equalShare = names.length ? totalAmount / names.length : 0;
-
   let balances = {};
-  names.forEach(name => {
-    balances[name] = totals[name] - equalShare;
-  });
-
+  names.forEach(n => balances[n] = totals[n] - equalShare);
   let creditors = names.filter(n => balances[n] > 0);
   let debtors = names.filter(n => balances[n] < 0);
   let settlements = [];
-
   while (creditors.length && debtors.length) {
     let creditor = creditors[0];
     let debtor = debtors[0];
     let amount = Math.min(balances[creditor], -balances[debtor]);
-
     settlements.push(`${debtor} should pay ${amount.toFixed(2)} to ${creditor}`);
-
     balances[creditor] -= amount;
     balances[debtor] += amount;
-
     if (balances[creditor] === 0) creditors.shift();
     if (balances[debtor] === 0) debtors.shift();
   }
-
-  if (settlements.length > 0) {
-    resultDiv.innerHTML = `<h3>Settlements:</h3><ul>` +
-      settlements.map(s => `<li>${s}</li>`).join("") +
-      `</ul>`;
-  } else {
-    resultDiv.textContent = names.length ? "Everyone has paid equally. No settlements needed." : "";
-  }
-
-  localStorage.setItem("bills", JSON.stringify(bills));
+  resultDiv.innerHTML = settlements.length ? `<ul>${settlements.map(s => `<li>${s}</li>`).join("")}</ul>` : "Everyone is settled!";
 }
 
-// Add bill
-form.addEventListener("submit", function(e) {
-  e.preventDefault();
-  const name = document.getElementById("name").value.trim();
-  const amount = document.getElementById("amount").value;
-  const description = document.getElementById("description").value.trim();
-  const refund = document.getElementById("refund").value.trim();
-
-  bills.push({ name, amount: Number(amount), description, refund });
-  form.reset();
-  renderBills();
-});
-
-// Reset bills
 resetBtn.addEventListener("click", () => {
-  if (confirm("Are you sure you want to clear all data?")) {
-    bills = [];
-    localStorage.removeItem("bills");
-    renderBills();
+  if (confirm("Clear all data?")) {
+    data[currentUser].activities = {};
+    saveData();
+    renderActivities();
+    resultDiv.innerHTML = "";
   }
 });
 
-// Login/Signup Logic
-showSignup.addEventListener("click", () => {
-  loginBox.style.display = "none";
-  signupBox.style.display = "block";
-});
-
-showLogin.addEventListener("click", () => {
-  signupBox.style.display = "none";
-  loginBox.style.display = "block";
-});
-
-signupForm.addEventListener("submit", e => {
-  e.preventDefault();
-  const username = document.getElementById("signupUser").value;
-  const password = document.getElementById("signupPass").value;
-
-  let users = JSON.parse(localStorage.getItem("users")) || {};
-  if (users[username]) {
-    alert("Username already exists!");
-  } else {
-    users[username] = password;
-    localStorage.setItem("users", JSON.stringify(users));
-    alert("Signup successful! Please login.");
-    signupBox.style.display = "none";
-    loginBox.style.display = "block";
-  }
-});
-
-loginForm.addEventListener("submit", e => {
-  e.preventDefault();
-  const username = document.getElementById("loginUser").value;
-  const password = document.getElementById("loginPass").value;
-
-  let users = JSON.parse(localStorage.getItem("users")) || {};
-  if (users[username] && users[username] === password) {
-    localStorage.setItem("currentUser", username);
-    loginBox.style.display = "none";
-    billTracker.style.display = "block";
-    welcome.textContent = `Welcome, ${username}!`;
-    renderBills();
-  } else {
-    alert("Invalid credentials!");
-  }
-});
-
-// Logout
-logoutBtn.addEventListener("click", () => {
-  localStorage.removeItem("currentUser");
-  billTracker.style.display = "none";
-  loginBox.style.display = "block";
-});
-
-// Restore session if logged in
-window.addEventListener("load", () => {
-  let currentUser = localStorage.getItem("currentUser");
-  if (currentUser) {
-    loginBox.style.display = "none";
-    billTracker.style.display = "block";
-    welcome.textContent = `Welcome, ${currentUser}!`;
-    renderBills();
-  }
-});
-
+// Load initial
+if (currentUser) loadData();
 
   
   

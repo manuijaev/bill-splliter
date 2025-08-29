@@ -1,79 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Bill Splitter</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bill Tracker with Login</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-lements.length > 0) {
-    resultDiv.i
-  <!-- Login Section -->
-  <div id="loginBox">
-    <h2>Login</h2>
-    <form id="loginForm">
-      <label>Username</label>
-      <input type="text" id="loginUser" required>
-      <label>Password</label>
-      <input type="password" id="loginPass" required>
-      <button type="submit">Login</button>
-      <p>Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
+  <!-- Login/Register Section -->
+  <div id="authSection" class="auth-container">
+    <h2 id="authTitle">Login</h2>
+    <form id="authForm">
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="submit" id="authBtn">Login</button>
+      <p>
+        <a href="#" id="toggleAuth">Don't have an account? Register</a>
+      </p>
     </form>
   </div>
 
-  <!-- Signup Section -->
-  <div id="signupBox" style="display:none;">
-    <h2>Sign Up</h2>lements.length > 0) {
-    resultDiv.i
-    <form id="signupForm">
-      <label>Username</label>
-      <input type="text" id="signupUser" required>
-      <label>Password</label>
-      <input type="password" id="signupPass" required>
-      <button type="submit">Sign Up</button>
-      <p>Already have an account? <a href="#" id="showLogin">Login</a></p>
-    </form>
-  </div>
+  <!-- Main App Section -->
+  <div id="appSection" style="display:none;">
+    <header>
+      <h1>Bill Splitter</h1>
+      <button id="logoutBtn">Logout</button>
+    </header>
 
-  <!-- Bill Tracker Section -->
-  <div id="billTracker" style="display:none;">
-    <h2 style="font-family: serif;color: brown;">Bill Splitter</h2>
-    <p id="welcome"></p>
-    <p><span style="color: crimson;">NOTE:</span>It takes two or more persons to calculate the refund</p>
+    <!-- Activity selection -->
+    <section class="activity-section">
+      <h2>Activities</h2>
+      <form id="activityForm">
+        <input type="text" id="activityName" placeholder="Activity name (e.g. Swimming)" required>
+        <button type="submit">Add Activity</button>
+      </form>
+      <select id="activitySelect"></select>
+    </section>
 
-    <form id="billForm">
-      <label>Payer Name</label>
-      <input type="text" id="name" required>
+    <!-- Participants -->
+    <section class="participant-section">
+      <h2>Participants</h2>
+      <form id="participantForm">
+        <input type="text" id="participantName" placeholder="Enter participant name" required>
+        <button type="submit">Add Participant</button>
+      </form>
+      <ul id="participantsList"></ul>
+    </section>
 
-      <label>Amount Paid</label>
-      <input type="number" id="amount" required>
+    <!-- Bills -->
+    <section class="bill-section">
+      <h2>Add Bill</h2>
+      <form id="billForm">
+        <input type="text" id="payerName" placeholder="Payer's name" required>
+        <input type="number" id="amount" placeholder="Amount paid" required>
+        <input type="text" id="description" placeholder="Description" required>
+        <button type="submit">Add Bill</button>
+      </form>
+      <table id="billTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Amount</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
 
-      <label>Description</label>
-      <input type="text" id="description" required>
-
-      <label>Refund (who should refund?)</label>
-      <input type="text" id="refund">
-
-      <button type="submit">Add Bill</button>
-    </form>
-
-    <h3>Payments</h3>
-    <table id="billTable">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Amount</th>
-          <th>Description</th>
-          <th>Refund</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <div id="result"></div>
-
-    <button id="resetBtn">Clear All Payments</button>
-    <button id="logoutBtn">Logout</button>
+    <!-- Settlements -->
+    <section class="settlement-section">
+      <h2>Settlements</h2>
+      <div id="result"></div>
+      <button id="resetBtn">Reset All Data</button>
+    </section>
   </div>
 
   <script src="script.js"></script>
