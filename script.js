@@ -203,5 +203,3 @@ resetBtn.addEventListener("click", () => {
 // Load initial
 if (currentUser) loadData();
 
-  
-  
