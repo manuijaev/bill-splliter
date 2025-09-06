@@ -1,53 +1,163 @@
-body {
-  font-family: Arial, sans-serif;
+/* Global Reset */
+* {
   margin: 0;
-  background: #f4f4f4;
-  color: #333;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  font-size: 17px;
 }
 
-/* Auth section */
-.auth-container {
-  max-width: 350px;
-  margin: 80px auto;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0px 6px 16px rgba(0,0,0,0.1);
-  text-align: center;
-}
-.auth-container input {
+/* Background styling for all sections */
+#authSection,
+#landingSection,
+#appSection {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 100vh;
   width: 100%;
-  padding: 12px;
-  margin: 10px 0;
+  position: relative;
+  color: white;
+}
+
+#authSection::before,
+#landingSection::before,
+#appSection::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  z-index: 0;
+}
+
+/* Ensure content above overlay */
+#authSection > *,
+#landingSection > *,
+#appSection > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Auth Section */
+/* Center the auth section */
+#authSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-image: url("money.png");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  color: white;
+}
+
+#authSection::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  z-index: 0;
+}
+
+/* Auth Form Styling */
+#authSection form {
+  position: relative;
+  z-index: 1;
+  background: rgba(0,0,0,0.6);
+  padding: 40px;           /* bigger padding */
+  border-radius: 15px;
+  text-align: center;
+  width: 400px;             /* wider form */
+  max-width: 90%;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+/* Inputs and buttons larger */
+#authSection input,
+#authSection button {
+  width: 90%;
+  margin: 15px auto;
+  padding: 15px;
+  font-size: 16px;
+  display: block;
   border-radius: 8px;
   border: 1px solid #ccc;
 }
-button {
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-#authBtn {
-  width: 100%;
-  background: #007bff;
-  color: white;
-}
-#authBtn:hover { background: #0056b3; transform: translateY(-2px); }
-#logoutBtn {
-  background: #dc3545;
-  color: white;
-}
-#logoutBtn:hover { background: #a71d2a; }
 
-/* App section */
+#authSection button {
+  background-color:red;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#authSection button:hover {
+  background-color: darkred;
+}
+
+#authSection p a {
+  color: red;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+#authSection p a:hover {
+  text-decoration: underline;
+  background-color: rgb(78, 83, 83);
+}
+
+#authSection form {
+   background: rgba(0, 0, 0, 0.4); 
+   justify-content: center;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 300px;
+}
+#authSection input,
+#authSection button {
+  width: 90%;
+  margin: 10px auto;
+  padding: 10px;
+  display: block;
+}
+
+/* Landing Section */
+#landingSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background-image: url("money.png");
+}
+#landingSection h1 {
+  font-size: 3em;
+  margin-bottom: 20px;
+}
+#landingSection p {
+  margin-bottom: 20px;
+}
+#landingSection button {
+  padding: 10px 20px;
+  font-size: 1.2em;
+  background: red;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+#landingSection button:hover {
+  background: darkred;
+}
+
+/* App Section */
 #appSection {
-  max-width: 900px;
-  margin: 20px auto;
+  background-image: url("money.png");
   padding: 20px;
 }
 header {
@@ -55,24 +165,99 @@ header {
   justify-content: space-between;
   align-items: center;
 }
-section {
-  margin: 20px 0;
-  padding: 15px;
+header h1 {
+  color: white;
+}
+header button {
+  padding: 8px 16px;
+  background: red;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+header button:hover {
+  background: darkred;
+}
+
+.app-layout {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+.left-panel, .right-panel {
+  flex: 1;
+  background: rgba(255,255,255,0.9);
+  padding: 20px;
   border-radius: 10px;
-  background: #fff;
-  box-shadow: 0px 4px 8px rgba(0,0,0,0.05);
+  overflow-y: auto;
+  max-height: 80vh;
 }
-form input, form button {
-  margin: 5px;
+
+h2 {
+  margin-bottom: 10px;
 }
-#billTable {
+
+/* Tables */
+table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
 }
-#billTable th, #billTable td {
-  border: 1px solid #ddd;
+th, td {
+  border: 1px solid #ccc;
   padding: 8px;
+  text-align: center;
+}
+td button {
+  background: red;
+  border: none;
+  color: white;
+  padding: 5px 8px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+td button:hover {
+  background: darkred;
+}
+
+/* Lists */
+ul {
+  list-style: none;
+  margin-top: 10px;
+}
+ul li {
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 0;
+}
+ul li button {
+  background: red;
+  border: none;
+  color: white;
+  padding: 3px 8px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+ul li button:hover {
+  background: darkred;
+}
+.left-panel, .right-panel {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.4); 
+  padding: 20px;
+  border-radius: 10px;
+  overflow-y: auto;
+  max-height: 80vh;
+  color: white; 
+}
+#resetBtn {
+background-color: red;
+border-radius: 30px;
+color: azure;
+} 
+#resetBtn:hover {
+  background-color: darkred;
 }
 
 

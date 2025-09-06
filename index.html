@@ -1,15 +1,16 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bill Tracker with Login</title>
+  <title>Bill Splitter</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <!-- Login/Register Section -->
   <div id="authSection" class="auth-container">
-    <h2 id="authTitle">Login</h2>
+    <h2 id="authTitle" style="font-size: 17px;">Login</h2>
     <form id="authForm">
       <input type="text" id="username" placeholder="Username" required>
       <input type="password" id="password" placeholder="Password" required>
@@ -20,6 +21,13 @@
     </form>
   </div>
 
+  <!-- Landing Page Section -->
+  <div id="landingSection" style="display:none;">
+    <h1>Welcome to Bill Tracker</h1>
+    <p>Track, split, and settle bills easily with your friends.</p>
+    <button id="goToAppBtn">Go to Bill Splitter</button>
+  </div>
+
   <!-- Main App Section -->
   <div id="appSection" style="display:none;">
     <header>
@@ -27,58 +35,72 @@
       <button id="logoutBtn">Logout</button>
     </header>
 
-    <!-- Activity selection -->
-    <section class="activity-section">
-      <h2>Activities</h2>
-      <form id="activityForm">
-        <input type="text" id="activityName" placeholder="Activity name (e.g. Swimming)" required>
-        <button type="submit">Add Activity</button>
-      </form>
-      <select id="activitySelect"></select>
-    </section>
+    <main class="app-layout">
+      <div class="left-panel">
+        <!-- Activity selection -->
+        <section class="activity-section">
+          <h2>Activities</h2>
+          <form id="activityForm">
+            <input type="text" id="activityName" placeholder="Activity name (e.g. Swimming)" required>
+            <button type="submit">Add Activity</button>
+          </form>
+          <select id="activitySelect"></select>
+          <ul id="activityList"></ul>
+        </section>
 
-    <!-- Participants -->
-    <section class="participant-section">
-      <h2>Participants</h2>
-      <form id="participantForm">
-        <input type="text" id="participantName" placeholder="Enter participant name" required>
-        <button type="submit">Add Participant</button>
-      </form>
-      <ul id="participantsList"></ul>
-    </section>
+        <!-- Participants -->
+        <section class="participant-section">
+          <h2>Participants</h2>
+          <form id="participantForm">
+            <input type="text" id="participantName" placeholder="Enter participant name" required>
+            <button type="submit">Add Participant</button>
+          </form>
+          <ul id="participantsList"></ul>
+        </section>
 
-    <!-- Bills -->
-    <section class="bill-section">
-      <h2>Add Bill</h2>
-      <form id="billForm">
-        <input type="text" id="payerName" placeholder="Payer's name" required>
-        <input type="number" id="amount" placeholder="Amount paid" required>
-        <input type="text" id="description" placeholder="Description" required>
-        <button type="submit">Add Bill</button>
-      </form>
-      <table id="billTable">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Amount</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
+        <!-- Bills -->
+        <section class="bill-section">
+          <h2>Add Bill</h2>
+          <form id="billForm">
+            <input type="text" id="payerName" placeholder="Payer's name" required>
+            <input type="number" id="amount" placeholder="Amount paid" required>
+            <input type="text" id="description" placeholder="Description" required>
+            <button type="submit">Add Bill</button>
+          </form>
+          <table id="billTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </section>
+      </div>
 
-    <!-- Settlements -->
-    <section class="settlement-section">
-      <h2>Settlements</h2>
-      <div id="result"></div>
-      <button id="resetBtn">Reset All Data</button>
-    </section>
+      <div class="right-panel">
+        <!-- Settlements -->
+        <section class="settlement-section">
+          <h2 style="color: red;">Settlements</h2>
+          <div id="result"></div>
+        </section>
+<br><br>
+        <!-- Summary -->
+        <section class="summary-section">
+          <h2 style="color: red;">Summary</h2>
+          <div id="summary"></div>
+        </section>
+
+        <button id="resetBtn">Reset All Data</button>
+      </div>
+    </main>
   </div>
 
   <script src="script.js"></script>
 </body>
 </html>
-
 
 

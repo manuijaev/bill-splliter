@@ -1,23 +1,49 @@
-// ===== AUTH SECTION =====
+
+
+
+// ==================== AUTH SECTION ====================
+
+// Safe initialization of users array
+let users;
+try {
+  users = JSON.parse(localStorage.getItem("users"));
+  if (!Array.isArray(users)) users = [];
+} catch {
+  users = [];
+}
+localStorage.setItem("users", JSON.stringify(users));
+
+let loggedInUser = localStorage.getItem("loggedInUser");
+
+// Auth DOM elements
 const authSection = document.getElementById("authSection");
-const appSection = document.getElementById("appSection");
 const authForm = document.getElementById("authForm");
-const toggleAuth = document.getElementById("toggleAuth");
 const authTitle = document.getElementById("authTitle");
 const authBtn = document.getElementById("authBtn");
-const logoutBtn = document.getElementById("logoutBtn");
+const toggleAuth = document.getElementById("toggleAuth");
 
-let isLogin = true;
+// Other sections
+const landingSection = document.getElementById("landingSection");
+const appSection = document.getElementById("appSection");
 
-// Load saved users
-let users = JSON.parse(localStorage.getItem("users")) || {};
-let currentUser = localStorage.getItem("currentUser") || null;
+// Bill tracker elements
+let activities = {};
+let currentActivity = null;
 
-if (currentUser) {
-  authSection.style.display = "none";
-  appSection.style.display = "block";
-}
+const activityForm = document.getElementById("activityForm");
+const activitySelect = document.getElementById("activitySelect");
+const participantForm = document.getElementById("participantForm");
+const participantsList = document.getElementById("participantsList");
+const billForm = document.getElementById("billForm");
+const billTableBody = document.querySelector("#billTable tbody");
+const resultDiv = document.getElementById("result");
+const resetBtn = document.getElementById("resetBtn");
 
+let isLogin = true; // default mode
+
+// ==================== AUTH FUNCTIONS ====================
+
+// Toggle login/register mode
 toggleAuth.addEventListener("click", (e) => {
   e.preventDefault();
   isLogin = !isLogin;
@@ -28,178 +54,282 @@ toggleAuth.addEventListener("click", (e) => {
     : "Already have an account? Login";
 });
 
+// Handle login/register form
 authForm.addEventListener("submit", (e) => {
   e.preventDefault();
+
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
 
+  if (!username || !password) {
+    alert("Please enter both username and password");
+    return;
+  }
+
   if (isLogin) {
-    if (users[username] && users[username] === password) {
-      currentUser = username;
-      localStorage.setItem("currentUser", username);
-      authSection.style.display = "none";
-      appSection.style.display = "block";
+    // LOGIN
+    const user = users.find(u => u.username === username && u.password === password);
+    if (user) {
+      loggedInUser = username;
+      localStorage.setItem("loggedInUser", username);
+      loadUserData();
+      showLandingPage();
       loadData();
     } else {
-      alert("Invalid credentials!");
+      alert("Invalid username or password. Please register first.");
     }
   } else {
-    if (users[username]) {
-      alert("User already exists!");
-    } else {
-      users[username] = password;
-      localStorage.setItem("users", JSON.stringify(users));
-      alert("Registration successful! Please login.");
-      isLogin = true;
-      authTitle.textContent = "Login";
-      authBtn.textContent = "Login";
-      toggleAuth.textContent = "Don't have an account? Register";
+    // REGISTER
+    if (users.some(u => u.username === username)) {
+      alert("Username already exists. Choose another.");
+      return;
     }
+
+    users.push({ username, password });
+    localStorage.setItem("users", JSON.stringify(users));
+    alert("Registration successful! Please log in.");
+    isLogin = true;
+    authForm.reset();
+    authTitle.textContent = "Login";
+    authBtn.textContent = "Login";
+    toggleAuth.textContent = "Don't have an account? Register";
   }
+
+  authForm.reset();
 });
 
-logoutBtn.addEventListener("click", () => {
-  currentUser = null;
-  localStorage.removeItem("currentUser");
-  appSection.style.display = "none";
+// Logout
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.removeItem("loggedInUser");
+  loggedInUser = null;
+  activities = {};
+
   authSection.style.display = "block";
+  landingSection.style.display = "none";
+  appSection.style.display = "none";
+
+  activitySelect.innerHTML = "";
+  participantsList.innerHTML = "";
+  billTableBody.innerHTML = "";
+  resultDiv.innerHTML = "";
 });
 
-// ===== BILL TRACKER SECTION =====
-const activityForm = document.getElementById("activityForm");
-const activitySelect = document.getElementById("activitySelect");
-const participantForm = document.getElementById("participantForm");
-const participantName = document.getElementById("participantName");
-const participantsList = document.getElementById("participantsList");
-const billForm = document.getElementById("billForm");
-const payerName = document.getElementById("payerName");
-const amount = document.getElementById("amount");
-const description = document.getElementById("description");
-const tableBody = document.querySelector("#billTable tbody");
-const resultDiv = document.getElementById("result");
-const resetBtn = document.getElementById("resetBtn");
+// Go to main app from landing page
+document.getElementById("goToAppBtn").addEventListener("click", showApp);
 
-let data = {}; // { user: { activities: { activityName: { participants:[], bills:[] } } } }
+// ==================== BILL TRACKER FUNCTIONS ====================
 
+// Show landing page
+function showLandingPage() {
+  authSection.style.display = "none";
+  landingSection.style.display = "block";
+  appSection.style.display = "none";
+}
+
+// Show main app
+function showApp() {
+  authSection.style.display = "none";
+  landingSection.style.display = "none";
+  appSection.style.display = "block";
+}
+
+// Load user-specific data
+function loadUserData() {
+  const data = JSON.parse(localStorage.getItem(`data_${loggedInUser}`)) || {};
+  activities = data;
+}
+
+// Save user-specific data
+function saveUserData() {
+  localStorage.setItem(`data_${loggedInUser}`, JSON.stringify(activities));
+}
+
+// Load data into UI
 function loadData() {
-  data = JSON.parse(localStorage.getItem("data")) || {};
-  if (!data[currentUser]) data[currentUser] = { activities: {} };
-  renderActivities();
-}
-
-function saveData() {
-  localStorage.setItem("data", JSON.stringify(data));
-}
-
-function renderActivities() {
   activitySelect.innerHTML = "";
-  const activities = data[currentUser].activities;
-  for (let act in activities) {
+  Object.keys(activities).forEach(act => {
     const option = document.createElement("option");
     option.value = act;
     option.textContent = act;
     activitySelect.appendChild(option);
+  });
+
+  if (activitySelect.value) {
+    currentActivity = activitySelect.value;
+    renderParticipants();
+    renderBills();
+    calculateSettlements();
   }
-  if (activitySelect.value) renderActivity(activitySelect.value);
 }
 
-function renderActivity(activity) {
-  const actData = data[currentUser].activities[activity];
-  // Render participants
+// Add activity
+activityForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const activityName = document.getElementById("activityName").value.trim();
+  if (!activityName) return;
+
+  if (!activities[activityName]) {
+    activities[activityName] = { participants: [], bills: [] };
+    saveUserData();
+  }
+
+  document.getElementById("activityName").value = "";
+  loadData();
+});
+
+// Switch activity
+activitySelect.addEventListener("change", () => {
+  currentActivity = activitySelect.value;
+  renderParticipants();
+  renderBills();
+  calculateSettlements();
+});
+
+// Add participant
+participantForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const name = document.getElementById("participantName").value.trim();
+  if (!name || !currentActivity) return;
+
+  activities[currentActivity].participants.push(name);
+  saveUserData();
+  document.getElementById("participantName").value = "";
+  renderParticipants();
+});
+
+// Render participants
+function renderParticipants() {
   participantsList.innerHTML = "";
-  actData.participants.forEach(p => {
+  if (!currentActivity) return;
+
+  activities[currentActivity].participants.forEach((p, index) => {
     const li = document.createElement("li");
     li.textContent = p;
+
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "Delete";
+    delBtn.onclick = () => {
+      activities[currentActivity].participants.splice(index, 1);
+      saveUserData();
+      renderParticipants();
+      calculateSettlements();
+    };
+
+    li.appendChild(delBtn);
     participantsList.appendChild(li);
   });
-  // Render bills
-  tableBody.innerHTML = "";
-  actData.bills.forEach(bill => {
+}
+
+// Add bill
+billForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (!currentActivity) return;
+
+  const payer = document.getElementById("payerName").value.trim();
+  const amount = parseFloat(document.getElementById("amount").value);
+  const desc = document.getElementById("description").value.trim();
+
+  if (!payer || isNaN(amount) || !desc) return;
+
+  activities[currentActivity].bills.push({ payer, amount, desc });
+  saveUserData();
+  billForm.reset();
+  renderBills();
+  calculateSettlements();
+});
+
+// Render bills
+function renderBills() {
+  billTableBody.innerHTML = "";
+  if (!currentActivity) return;
+
+  activities[currentActivity].bills.forEach((bill, index) => {
     const row = document.createElement("tr");
-    row.innerHTML = `<td>${bill.name}</td><td>${bill.amount}</td><td>${bill.description}</td>`;
-    tableBody.appendChild(row);
+    row.innerHTML = `
+      <td>${bill.payer}</td>
+      <td>${bill.amount}</td>
+      <td>${bill.desc}</td>
+    `;
+    const td = document.createElement("td");
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "Delete";
+    delBtn.onclick = () => {
+      activities[currentActivity].bills.splice(index, 1);
+      saveUserData();
+      renderBills();
+      calculateSettlements();
+    };
+    td.appendChild(delBtn);
+    row.appendChild(td);
+    billTableBody.appendChild(row);
   });
-  calculateSettlements(activity);
 }
 
-activityForm.addEventListener("submit", e => {
-  e.preventDefault();
-  const name = document.getElementById("activityName").value.trim();
-  if (!data[currentUser].activities[name]) {
-    data[currentUser].activities[name] = { participants: [], bills: [] };
-    saveData();
-    renderActivities();
-    activityForm.reset();
-  } else {
-    alert("Activity already exists!");
-  }
-});
+// Calculate settlements and summary
+function calculateSettlements() {
+  resultDiv.innerHTML = "";
+  const summaryDiv = document.getElementById("summary");
+  summaryDiv.innerHTML = "";
 
-participantForm.addEventListener("submit", e => {
-  e.preventDefault();
-  const activity = activitySelect.value;
-  const pName = participantName.value.trim();
-  if (activity && pName && !data[currentUser].activities[activity].participants.includes(pName)) {
-    data[currentUser].activities[activity].participants.push(pName);
-    saveData();
-    renderActivity(activity);
-    participantForm.reset();
-  }
-});
+  if (!currentActivity) return;
 
-billForm.addEventListener("submit", e => {
-  e.preventDefault();
-  const activity = activitySelect.value;
-  const bill = {
-    name: payerName.value.trim(),
-    amount: Number(amount.value),
-    description: description.value.trim()
-  };
-  if (activity) {
-    data[currentUser].activities[activity].bills.push(bill);
-    saveData();
-    renderActivity(activity);
-    billForm.reset();
-  }
-});
+  const bills = activities[currentActivity].bills;
+  const participants = activities[currentActivity].participants;
 
-function calculateSettlements(activity) {
-  const actData = data[currentUser].activities[activity];
+  if (participants.length === 0 || bills.length === 0) return;
+
   let totals = {};
-  actData.participants.forEach(p => totals[p] = 0);
-  actData.bills.forEach(bill => {
-    totals[bill.name] = (totals[bill.name] || 0) + bill.amount;
+  participants.forEach(p => totals[p] = 0);
+  bills.forEach(b => {
+    if (totals[b.payer] !== undefined) totals[b.payer] += b.amount;
   });
-  const names = Object.keys(totals);
-  const totalAmount = Object.values(totals).reduce((a, b) => a + b, 0);
-  const equalShare = names.length ? totalAmount / names.length : 0;
-  let balances = {};
-  names.forEach(n => balances[n] = totals[n] - equalShare);
-  let creditors = names.filter(n => balances[n] > 0);
-  let debtors = names.filter(n => balances[n] < 0);
+
+  const totalSpent = Object.values(totals).reduce((a, b) => a + b, 0);
+  const share = totalSpent / participants.length;
+
+  // Summary
+  let summaryHTML = `<h3>Summary</h3>`;
+  summaryHTML += `<p><strong>Total Spent:</strong> ${totalSpent.toFixed(2)}</p>`;
+  summaryHTML += `<p><strong>Equal Share:</strong> ${share.toFixed(2)}</p>`;
+  summaryHTML += `<ul>`;
+  participants.forEach(p => {
+    summaryHTML += `<li>${p}: Paid ${totals[p].toFixed(2)}</li>`;
+  });
+  summaryHTML += `</ul>`;
+  summaryDiv.innerHTML = summaryHTML;
+
+  // Settlements
   let settlements = [];
-  while (creditors.length && debtors.length) {
-    let creditor = creditors[0];
-    let debtor = debtors[0];
-    let amount = Math.min(balances[creditor], -balances[debtor]);
-    settlements.push(`${debtor} should pay ${amount.toFixed(2)} to ${creditor}`);
-    balances[creditor] -= amount;
-    balances[debtor] += amount;
-    if (balances[creditor] === 0) creditors.shift();
-    if (balances[debtor] === 0) debtors.shift();
-  }
-  resultDiv.innerHTML = settlements.length ? `<ul>${settlements.map(s => `<li>${s}</li>`).join("")}</ul>` : "Everyone is settled!";
+  participants.forEach(p => {
+    const balance = totals[p] - share;
+    if (balance > 0) settlements.push(`${p} should receive ${balance.toFixed(2)}`);
+    else if (balance < 0) settlements.push(`${p} should pay ${Math.abs(balance).toFixed(2)}`);
+    else settlements.push(`${p} is settled up.`);
+  });
+  resultDiv.innerHTML = `<h3>Settlements</h3>` + settlements.join("<br>");
 }
 
+// Reset all data for current user
 resetBtn.addEventListener("click", () => {
-  if (confirm("Clear all data?")) {
-    data[currentUser].activities = {};
-    saveData();
-    renderActivities();
+  if (confirm("Are you sure you want to clear all data?")) {
+    activities = {};
+    saveUserData();
+    loadData();
+    participantsList.innerHTML = "";
+    billTableBody.innerHTML = "";
     resultDiv.innerHTML = "";
   }
 });
 
-// Load initial
-if (currentUser) loadData();
-
+// ==================== INITIAL LOAD ====================
+window.addEventListener("DOMContentLoaded", () => {
+  if (loggedInUser) {
+    showLandingPage();
+    loadUserData();
+    loadData();
+  } else {
+    authSection.style.display = "block";
+    landingSection.style.display = "none";
+    appSection.style.display = "none";
+  }
+});
